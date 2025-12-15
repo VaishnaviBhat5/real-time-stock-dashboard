@@ -62,13 +62,14 @@ export default function Dashboard({ email, onLogout }) {
 }
 */
 import React, { useState, useEffect } from "react";
-
 import { io } from "socket.io-client";
 
-// Use secure WebSocket if frontend is https
-const socket = io(process.env.REACT_APP_BACKEND_URL.replace(/^http/, "wss"), {
+// Use backend URL from environment variable
+const socket = io(process.env.REACT_APP_BACKEND_URL, {
   transports: ["websocket"]
 });
+// dashboard.jsx
+
 export default function Dashboard({ email, onLogout }) {
   const [subscriptions, setSubscriptions] = useState([]);
   const [prices, setPrices] = useState({});
