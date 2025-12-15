@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("https://stock-dashboard-backend-7b37.onrender.com");
+const socket = io(process.env.REACT_APP_BACKEND_URL);
 
 export default function Dashboard({ email, onLogout }) {
   const [subscriptions, setSubscriptions] = useState([]);
