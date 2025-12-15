@@ -36,6 +36,8 @@ server.listen(4000, () => {
   console.log("Server listening on 4000");
 });*/
 
+
+/*
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -49,6 +51,7 @@ const io = new Server(server, {
     methods: ["GET", "POST"]
   }
 });
+
 
 
 const subscriptions = {};
@@ -88,11 +91,57 @@ setInterval(() => {
 
 /*server.listen(4000, () => {
   console.log("Server running on port 4000");
-});*/
+});
 const PORT = process.env.PORT || 4000;
 
 server.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
+*/
+
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+
+const app = express();
+const server = http.createServer(app);
+
+// Allow all origins for development/preview (safe for testing)
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+const subscriptions = {};
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("subscribe", ({ email, stock }) => {
+    socket.join(email);
+
+    if (!subscriptions[email]) subscriptions[email] = [];
+    if (!subscriptions[email].includes(stock)) subscriptions[email].push(stock);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
+// Send random price updates every second
+setInterval(() => {
+  for (const email in subscriptions) {
+    subscriptions[email].forEach((stock) => {
+      const price = (Math.random() * 1000 + 100).toFixed(2);
+      io.to(email).emit("priceUpdate", { stock, price });
+    });
+  }
+}, 1000);
+
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, () => console.log(`Server listening on ${PORT}`));
 
 
