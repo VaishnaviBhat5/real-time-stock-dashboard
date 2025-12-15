@@ -45,10 +45,11 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://stock-dashboard.vercel.app", // change after frontend deploy
+    origin: "https://real-time-stock-dashboard-kdkgw9dbk-vaishnavi-bhats-projects.vercel.app/", // change after frontend deploy
     methods: ["GET", "POST"]
   }
 });
+
 
 const subscriptions = {};
 

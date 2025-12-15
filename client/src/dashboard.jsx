@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 
-const socket = io(process.env.REACT_APP_BACKEND_URL);
-
+const socket = io(process.env.REACT_APP_BACKEND_URL, {
+  transports: ["websocket"],  // forces WebSocket connection
+});
 export default function Dashboard({ email, onLogout }) {
   const [subscriptions, setSubscriptions] = useState([]);
   const [prices, setPrices] = useState({});
