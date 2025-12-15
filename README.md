@@ -43,13 +43,21 @@ Socket.IO
 Project Structure
 stock_dashboard/
 ├── client/          # React frontend
+
 │   ├── src/
+
 │   ├── index.html
+
 │   ├── vite.config.js
+
 │   └── package.json
+
 ├── server/          # Node.js backend
+
 │   ├── index.js
+
 │   └── package.json
+
 └── README.md
 
 Setup Instructions
