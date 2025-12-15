@@ -61,48 +61,52 @@ export default function Dashboard({ email, onLogout }) {
   );
 }
 */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 
-// Use backend URL from environment variable
-const socket = io(process.env.REACT_APP_BACKEND_URL, {
-  transports: ["websocket"]
-});
-// dashboard.jsx
-
 export default function Dashboard({ email, onLogout }) {
+  const socketRef = useRef(null);
   const [subscriptions, setSubscriptions] = useState([]);
   const [prices, setPrices] = useState({});
 
   const supportedStocks = ["GOOG", "TSLA", "AMZN", "META", "NVDA"];
 
   useEffect(() => {
-    socket.on("priceUpdate", (data) => {
-      if (subscriptions.includes(data.stock)) {
-        setPrices((prev) => ({ ...prev, [data.stock]: data.price }));
-      }
+    socketRef.current = io(process.env.REACT_APP_BACKEND_URL, {
+      transports: ["websocket"],
+      secure: true
     });
 
-    return () => socket.off("priceUpdate");
-  }, [subscriptions]);
+    socketRef.current.on("connect", () => {
+      console.log("Socket connected:", socketRef.current.id);
+    });
+
+    socketRef.current.on("priceUpdate", ({ stock, price }) => {
+      setPrices(prev => ({ ...prev, [stock]: price }));
+    });
+
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, []);
 
   const handleSubscribe = (stock) => {
     if (!subscriptions.includes(stock)) {
-      setSubscriptions([...subscriptions, stock]);
-      socket.emit("subscribe", { email, stock });
+      setSubscriptions(prev => [...prev, stock]);
+      socketRef.current.emit("subscribe", { email, stock });
     }
   };
 
   return (
-    <div className="dashboard-container" style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", flex: 1, display: "flex", flexDirection: "column", padding: "20px 0 20px 20px" }}>
+    <div className="dashboard-container">
       <div className="dashboard-header">
         <h2>Dashboard - {email}</h2>
-        <button id="logout" onClick={onLogout}>Logout</button>
+        <button onClick={onLogout}>Logout</button>
       </div>
 
       <h3>Subscribe to Stocks</h3>
       <div className="stock-buttons">
-        {supportedStocks.map((stock) => (
+        {supportedStocks.map(stock => (
           <button
             key={stock}
             onClick={() => handleSubscribe(stock)}
@@ -115,12 +119,10 @@ export default function Dashboard({ email, onLogout }) {
 
       <h3>Subscribed Stocks</h3>
       <div className="stock-grid">
-        {subscriptions.map((stock) => (
+        {subscriptions.map(stock => (
           <div key={stock} className="stock-card">
             <h4>{stock}</h4>
-            <p className={prices[stock] >= 0 ? "price-up" : "price-down"}>
-              ${prices[stock] || "..."}
-            </p>
+            <p>${prices[stock] || "..."}</p>
           </div>
         ))}
       </div>
