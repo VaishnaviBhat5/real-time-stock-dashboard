@@ -72,24 +72,26 @@ export default function Dashboard({ email, onLogout }) {
   const supportedStocks = ["GOOG", "TSLA", "AMZN", "META", "NVDA"];
 
   useEffect(() => {
-    const backendUrl = process.env.REACT_APP_BACKEND_URL;
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     console.log("Connecting to backend:", backendUrl);
 
     socketRef.current = io(backendUrl, {
       transports: ["websocket"],
-      secure: true
     });
 
     socketRef.current.on("connect", () => {
-      console.log("✅ Connected to socket:", socketRef.current.id);
+      console.log("✅ Connected:", socketRef.current.id);
     });
 
     socketRef.current.on("connect_error", (err) => {
-      console.error("❌ Socket connection error:", err.message);
+      console.error("❌ Socket error:", err.message);
     });
 
     socketRef.current.on("priceUpdate", ({ stock, price }) => {
-      setPrices((prev) => ({ ...prev, [stock]: price }));
+      setPrices((prev) => ({
+        ...prev,
+        [stock]: price,
+      }));
     });
 
     return () => {
@@ -114,12 +116,14 @@ export default function Dashboard({ email, onLogout }) {
         flex: 1,
         display: "flex",
         flexDirection: "column",
-        padding: "20px 0"
+        padding: "20px 0",
       }}
     >
       <div className="dashboard-header">
         <h2>Dashboard - {email}</h2>
-        <button onClick={onLogout}>Logout</button>
+        <button id="logout" onClick={onLogout}>
+          Logout
+        </button>
       </div>
 
       <h3>Subscribe to Stocks</h3>
